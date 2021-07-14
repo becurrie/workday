@@ -98,9 +98,12 @@ def build_options_menu():
         if isinstance(spec, dict):
             spec_menu = MenuItem(spec["menu"])
             for spec_choice in spec["choices"]:
-                spec_choice_menu = MenuItem(spec_choice[0], callback=spec_choice[1])
-                spec_choice_menu.state = int(config.config.get(spec["config"]) == spec_choice[0])
-                spec_menu.add(spec_choice_menu)
+                if isinstance(spec_choice, tuple):
+                    spec_choice_menu = MenuItem(spec_choice[0], callback=spec_choice[1])
+                    spec_choice_menu.state = int(config.config.get(spec["config"]) == spec_choice[0])
+                    spec_menu.add(spec_choice_menu)
+                else:
+                    spec_menu.add(spec_choice)
             menu.add(spec_menu)
         else:
             menu.add(spec)
