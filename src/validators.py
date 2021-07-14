@@ -1,5 +1,8 @@
 import os
 
+from dateutil.parser import (
+    parse,
+)
 from pathlib import (
     Path,
 )
@@ -45,4 +48,16 @@ def validate_repository_duplicate(value):
         raise ValidationError(
             title="Duplicate Repository",
             message="That repository is already being tracked.",
+        )
+
+
+def validate_time(value):
+    """Validates that the ``value`` specified is a valid time value.
+    """
+    try:
+        parse(value)
+    except Exception as exc:
+        raise ValidationError(
+            title="Invalid Time",
+            message="Please enter a valid time string.",
         )
