@@ -23,6 +23,9 @@ from src.app.menus import (
     build_outlook_menu,
     build_jira_menu,
 )
+from src.app.callbacks import (
+    autogenerate_cb,
+)
 
 
 class WorkDayApp(App):
@@ -48,6 +51,12 @@ class WorkDayApp(App):
                 refresh_spec[1],
                 refresh_spec[2](),
             )
+
+    @timer(360)
+    def autogenerate(self, sender):
+        """Attempt to autogenerate reports on a timer.
+        """
+        autogenerate_cb(sender=sender)
 
     @clicked(ABOUT)
     def about(self, sender):
