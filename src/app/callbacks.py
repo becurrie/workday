@@ -1,9 +1,16 @@
 from subprocess import (
     call,
 )
+from datetime import (
+    datetime,
+)
+from dateutil.parser import (
+    parse,
+)
 
 from rumps import (
     Window,
+    alert,
     notification,
 )
 
@@ -16,6 +23,7 @@ from src.external.outlook import (
 
 from src.conf.conf import (
     USER_DATA_DIR,
+    ENABLE,
 )
 from src.conf.config import (
     config,
@@ -28,6 +36,7 @@ from src.validators import (
     validate_directory,
     validate_repository,
     validate_repository_duplicate,
+    validate_time,
 )
 
 
@@ -212,6 +221,54 @@ def click_configure_jira_token_cb(sender):
         )
 
 
+def click_enable_auto_generate_cb(sender):
+    """Handle the use case where a user clicks on the ``Enable`` menu item available when using the
+    auto generate report daily menu.
+    """
+    window = Window(
+        title="Configure Auto Generate Report Daily Time",
+        message=(
+            "Enter the time that you would like for the auto generated report to run every day.\n"
+            "(example: 5:00 PM)."
+        ),
+        dimensions=(320, 50),
+        cancel=True,
+    )
+    result = wait_for_result(
+        window=window,
+        validators=[
+            validate_time,
+        ],
+    )
+
+    if result is not None:
+        config.update(
+            generate_daily=ENABLE,
+        )
+        config.update(
+            generate_daily_time=result,
+        )
+        notification(
+            title="Configure Auto Generate Report Daily Time",
+            subtitle="Auto Report Daily Time Configured Successfully",
+            message=f"Auto generation time configured successfully: {result}",
+        )
+
+
+def click_auto_generate_help_cb(sender):
+    """Handle the use case where a user clicks on the ``Help`` menu item available when using the
+    auto generate report daily menu.
+    """
+    alert(
+        title="Auto Generate Report Help",
+        message=(
+            "Enable this feature to auto generate a report for each configured repository.\n\n"
+            "The report will run everyday when the configured time is surpassed while the Workday "
+            "application is running."
+        )
+    )
+
+
 def generate_config_callback(**kwargs):
     """Generate a callback function to update a specified config value.
     """
@@ -220,3 +277,36 @@ def generate_config_callback(**kwargs):
             **kwargs,
         )
     return callback
+
+
+def autogenerate_cb(sender):
+    """Callback for the autogenerate functionality.
+
+    This is called on a timer and currently checked every X seconds,
+    we only ever update repositories if the current date hasn't
+    already had an automatic generation completed.
+    """
+    if config.generate_daily == ENABLE:
+        now = datetime.now()
+        date = now.strftime("%d/%m/%Y")
+        hour = now.hour
+
+        if (
+            outlook_manager.authenticated
+            and date not in data.auto_handled
+            and hour >= parse(config.generate_daily_time).hour
+        ):
+            for repository in config.repositories:
+                outlook_manager.generate_itinerary(
+                    itinerary=RepositoryParser(repository).generate(),
+                    itinerary_type=config.itinerary_type,
+                )
+                notification(
+                    title="Generate Report (Auto)",
+                    subtitle="Workday Report Generated",
+                    message="Workday report has been generated automatically.",
+                )
+
+            data.update(auto_handled=data.auto_handled + [
+                date,
+            ])
