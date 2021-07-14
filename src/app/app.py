@@ -63,7 +63,6 @@ class WorkDayApp(App):
         """Display a simple about page with some information about the application.
         """
         alert(
-            icon_path=APP_ICON,
             title="%(app_name)s %(version)s" % {
                 "app_name": APP_NAME,
                 "version": APP_VERSION,
