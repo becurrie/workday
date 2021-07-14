@@ -5,6 +5,7 @@ from simple_config import (
 from src.conf.conf import (
     USER_CONFIG_FILE,
     USER_DATA_FILE,
+    DISABLE,
     MULTIPLE_EVENTS,
     FIVE_MINUTES,
     DEFAULT_CALENDAR,
@@ -46,6 +47,8 @@ config = ExtConfig(
         "jira_username": None,
         "jira_token": None,
         "repositories": [],
+        "generate_daily": DISABLE,
+        "generate_daily_time": None,
         "itinerary_type": MULTIPLE_EVENTS,
         "minimum_event_duration": FIVE_MINUTES,
         "hardcoded_start_time": None,
@@ -58,6 +61,7 @@ data = ExtConfig(
     path=USER_DATA_FILE,
     defaults={
         "tracked": {},
+        "auto_handled": [],
     },
 )
 

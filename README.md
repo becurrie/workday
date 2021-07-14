@@ -63,14 +63,14 @@ If you plan on setting up a development environment, use the instructions below:
 - Install the requirements taken from the `requirements.txt` file.
 
 ```bash
-pip install -r requirements/requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Usage
 
-> If you're using the latest executable available, you can just launch the application
-> directly and ignore the instructions below.
-
+- If you're using the latest executable available, you can just launch the application
+  directly and ignore the instructions below.
+  
 - Run `src/workday.py` to launch the application from within a development environment.
 
 ## Contributing

@@ -13,6 +13,10 @@ from src.conf.conf import (
     STOP_TRACKING,
     VIEW_LOCAL_DATA,
     DELETE_LOCAL_DATA,
+    AUTO_GENERATE_REPORT_DAILY,
+    ENABLE,
+    DISABLE,
+    HELP,
     ITINERARY_TYPE,
     MULTIPLE_EVENTS,
     SINGLE_EVENT,
@@ -57,6 +61,8 @@ from src.app.callbacks import (
     click_configure_jira_url_cb,
     click_configure_jira_username_cb,
     click_configure_jira_token_cb,
+    click_enable_auto_generate_cb,
+    click_auto_generate_help_cb,
     generate_config_callback,
 )
 
@@ -80,6 +86,17 @@ def generate_options_spec():
     ]
     """
     return [
+        {
+            "menu": AUTO_GENERATE_REPORT_DAILY,
+            "config": "generate_daily",
+            "choices": [
+                (ENABLE, click_enable_auto_generate_cb),
+                (DISABLE, generate_config_callback(generate_daily=DISABLE, generate_daily_time=None)),
+                separator,
+                (HELP, click_auto_generate_help_cb),
+            ],
+        },
+        separator,
         {
             "menu": ITINERARY_TYPE,
             "config": "itinerary_type",
