@@ -117,35 +117,46 @@ class RepositoryParser(object):
         self.parse()
 
         today = date.today()
+        yesterday = today - timedelta(days=1)
+
         today_refs = []
+        yesterday_refs = []
 
         for ref in self.parsed.values():
             ref = copy.deepcopy(ref)
-            ref_timestamp = datetime.strptime(
+            ref["timestamp"] = datetime.strptime(
                 ref["timestamp"],
                 "%Y-%m-%d %H:%M:%S %z",
             )
 
-            if ref_timestamp.date() == today:
-                ref["timestamp"] = ref_timestamp
+            if ref["timestamp"].date() == today:
                 today_refs.append(
                     ref,
                 )
+            if ref["timestamp"].date() == yesterday:
+                yesterday_refs.append(
+                    ref,
+                )
 
-        ordered_refs = sorted(
+        yesterday_refs = sorted(
+            yesterday_refs,
+            key=lambda x: x["timestamp"],
+        )
+        today_refs = sorted(
             today_refs,
             key=lambda x: x["timestamp"],
         )
+        today_refs.insert(0, yesterday_refs[-1])
 
         events = []
 
-        max_index = len(ordered_refs)
+        max_index = len(today_refs)
         cur_index = 0
 
         for i in range(max_index):
-            ref_one = ordered_refs[cur_index]
+            ref_one = today_refs[cur_index]
             try:
-                ref_two = ordered_refs[cur_index + 1]
+                ref_two = today_refs[cur_index + 1]
             except IndexError:
                 ref_two = None
 
@@ -164,8 +175,12 @@ class RepositoryParser(object):
 
             if config.hardcoded_start_time:
                 hour = HOUR_MAP[config.hardcoded_start_time]
-                if ref_one["timestamp"].hour < hour:
+                if (
+                    ref_one["timestamp"].hour < hour
+                    or ref_one["timestamp"].date() != today
+                ):
                     ref_one["timestamp"] = ref_one["timestamp"].replace(
+                        day=today.day,
                         hour=hour,
                         minute=0,
                         second=0,
